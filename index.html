@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <meta
+      http-equiv="Content-Security-Policy"
+      content="upgrade-insecure-requests"
+    /> -->
+    <title>CaTalk Forum</title>
+    <link
+      rel="icon"
+      type="image/gif"
+      href="https://media.tenor.com/Vy5sPxwNWxAAAAAi/sebusun-mocha.gif"
+    />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+
+    <script id="newPostToast" type="text/x-handlebars-template">
+      <div
+        id="toast-simple"
+        class="flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white divide-x divide-gray-200 rounded-lg shadow"
+        role="alert"
+      >
+        <svg
+          class="w-5 h-5 text-blue-600 dark:text-blue-500 rotate-45"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 18 20"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m9 17 8 2L9 1 1 19l8-2Zm0 0V9"
+          />
+        </svg>
+        <div class="pl-4 text-sm font-normal">New Post</div>
+      </div>
+    </script>
+    <script id="main-page-template" type="text/x-handlebars-template">
+            <div
+        id="posts-container"
+        class="posts-container max-w-lg overflow-x-hidden h-full max-h-max"
+      ></div>
+
+      <div class="w-[20%] flex flex-col gap-2">
+        <div id="recent-posts-container" class="w-full bg-white"></div>
+
+        <div
+          class="sticky top-20 w-full bg-white p-3 rounded text-base justify-around grid grid-cols-1 gap-4"
+        >
+          <div
+            class="flex flex-row justify-between p-4 bg-white border-b-[1px]"
+          >
+            <h1 class="text-sm font-semibold">User Agreement</h1>
+            <a class="text-sm font-semibold cursor-pointer">Content Policy</a>
+          </div>
+
+          <div
+            class="flex flex-row justify-between items-around py-2 px-4 border-b-[1px]"
+          >
+            <div class="flex flex-col text-sm">
+              <a class="cursor-pointer">English</a>
+              <a class="cursor-pointer">Filipino</a>
+              <a class="cursor-pointer">Cebuano</a>
+            </div>
+            <div class="flex flex-col text-sm">
+              <a class="cursor-pointer">Japanese</a>
+              <a class="cursor-pointer">Français</a>
+            </div>
+          </div>
+
+          <div class="flex flex-row items-center justify-around gap-2 mx-20">
+            <a
+              class="hover:scale-105 transition"
+              href="https://icons8.com"
+              target="_blank"
+            >
+              <img
+                width="30"
+                height="30"
+                src="https://img.icons8.com/color/48/icons8-new-logo.png"
+                alt="icons8-new-logo"
+              />
+            </a>
+            <a
+              class="hover:scale-105 transition"
+              href="https://fontawesome.com/"
+              target="_blank"
+            >
+              <img
+                width="32"
+                height="32"
+                src="https://img.icons8.com/windows/32/font-awesome.png"
+                alt="font-awesome"
+              />
+            </a>
+            <a
+              class="hover:scale-105 transition"
+              href="https://github.com/Kuugang/catalk"
+              target="_blank"
+            >
+              <img
+                width="28"
+                height="28"
+                src="https://img.icons8.com/glyph-neue/64/github.png"
+                alt="github"
+              />
+            </a>
+          </div>
+
+          <div
+            class="max-w-[280px] flex flex-row items-end justify-center bottom-5 left-3"
+          >
+            <p class="text-sm font-semibold">Kuugang</p>
+            <img
+              class="w-[12%]"
+              src="https://media.tenor.com/j_XffFNH-8gAAAAi/phone.gif"
+              alt=""
+            />
+            <p class="text-sm font-semibold ml-1">| All rights reserved.</p>
+          </div>
+        </div>
+      </div> 
+    </script>
+    <script id="posts" type="text/x-handlebars-template">
+      {{#if data}}
+      {{#each data}}
+          {{#if post}}
+          <div class="post-item relative w-full shadow-md border rounded {{#if isPinned}} border-red-500 {{else}} border-gray-200 {{/if}} mb-2 px-5 pb-1 pt-3 {{# if postOwner}} bg-blue-300 {{else}} bg-cyan-50{{/if}} hover:border hover:border-black cursor-pointer transition break-words overflow-hidden" id="{{id}}">
+              {{#if isPinned}}
+                  <i class="fa-solid fa-paw z-10 absolute top-1 right-2 text-2xl rotate-[30deg]"></i>
+              {{/if}}
+
+              <div class = "p-2 border bg-[#E3F2F1] relative w-full">
+                  {{#if user}}
+                      <div class = "flex flex-row items-center gap-1 items-end break-words overflow-hidden">
+                          <h1 class="font-extralight text-sm inline">Posted by:</h1>
+                          <img class="w-1/12 bg-zinc-100 border border-black rounded-full inline" {{#if postOwner}} src = "https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif" {{else}} src = "https://i.pinimg.com/originals/6f/65/78/6f65784caf4dd9f9932de464788dde43.jpg"{{/if}}>
+                          <a class="userLink text-base font-medium inline underline decoration-1 text-left cursor-pointer" id = {{uid}}>{{user}}</a>
+                      </div>
+                  {{else}}
+                      <h1 class = "font-extralight text-sm inline">Posted by: </h1>
+                      <img class="w-1/12 bg-zinc-100 border border-black rounded-full inline" {{#if postOwner}} src = "https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif" {{else}} src = "https://i.pinimg.com/originals/6f/65/78/6f65784caf4dd9f9932de464788dde43.jpg"{{/if}}>
+                      <a class = "userLink text-base font-medium inline underline italic cursor-pointer" id = {{uid}}>Anon </a>
+                  {{/if}}
+
+                  <p class = "mt-3 mb-1 text-base font-medium">{{post}}</p>
+                  <p class="text-xs font-extralight">{{date}}</p>
+              </div>
+              <button class="font-extralight text-sm hover:bg-gray-200 inline"> <i class="inline fa-regular fa-comments"></i> {{replyCount}} Comments</button>
+
+              {{#if (getUserState)}}
+                  <button id = {{id}} class = "interact font-extralight text-sm hover:bg-gray-200" onclick="pinPost(this)"><i class="fa-regular fa-bookmark {{#if isPinned}} bg-red-600{{/if}}"></i> Pin </button>
+              {{/if}}
+          </div>
+          {{/if}}
+      {{/each}}
+      {{else}}
+          <img src="https://media.tenor.com/wbMwEgXdIcsAAAAi/milk-cat.gif" class = "w-1/2 mx-auto" alt="">
+          <p class = "text-center">Wow empty...</p>
+      {{/if}}
+    </script>
+
+    <script id="activities" type="text/x-handlebars-template">
+      <div class = "flex flex-col p-3 w-full">
+          {{#if data}}
+              {{#each data}}
+                  {{#if post}}
+                      <div class="text-sm post-item shadow-md border rounded border-gray-200 mb-1 px-5 pb-1 pt-3 {{#if postOwner}} bg-blue-300{{else}} bg-cyan-50{{/if}} hover:scale-105 cursor-pointer transition break-words overflow-hidden" id="{{id}}">
+                          <p class="mb-2">{{post}}</p>
+                          {{#if user}}
+                              <h1 class="text-xs inline">By: </h1><h1 class="text-sm font-semibold inline">{{user}}</h1>
+                          {{else}}
+                              <h1 class="text-xs inline">By: </h1><h1 class="text-sm font-semibold inline-block italic">Anon</h1>
+                          {{/if}}
+                          <p class="text-xs mb-2">{{date}}</p>
+                      </div>
+                  {{/if}}
+              {{/each}}
+          {{else}}
+              <p class = "text-sm mt-10 text-center">Nothing here yet... Go make your first post.</p>
+              <img class = "w-1/2 mx-auto"src="https://media.tenor.com/j2QJ3XFBh-8AAAAi/give-me-that-reaching.gif" alt="">
+          {{/if}}
+      </div>
+    </script>
+
+    <script id="postFocus" type="text/x-handlebars-template">
+      <div class = "relative flex flex-col bg-white px-9 pr-10 pt-8 pb-8 text-sm post-focus-content bg-white shadow-md rounded bg-white shadow-md rounded w-full min-w-full max-w-md max-h-[40rem] overflow-y-auto">
+          <button class = "transition hover:scale-125 absolute top-3 right-4" onclick="closePostFocus()">
+              <i class="fa-solid fa-xmark text-2xl" style="color: #e60000;"></i>
+          </button>
+
+          <div class="relative p-2 border rounded border-slate-100 bg-white break-words" id = {{data.id}}>
+              {{#if data.user}}
+                  <div class = "flex flex-row items-center gap-1 items-end break-words overflow-hidden">
+                      <h1 class="font-extralight text-sm inline whitespace-nowrap">Posted by:</h1>
+                      <img class="w-[4%] bg-zinc-100 border border-black rounded-full inline" {{#if data.postOwner}} src = "https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif" {{else}} src = "https://i.pinimg.com/originals/6f/65/78/6f65784caf4dd9f9932de464788dde43.jpg"{{/if}}>
+                      <a class="userLink text-sm font-medium inline underline decoration-1 text-left cursor-pointer" id = {{data.uid}}>{{data.user}}</a>
+                  </div>
+              {{else}}
+                  <div class = "flex flex-row items-center gap-1 items-end break-words">
+                      <h1 class="font-extralight text-sm inline">Posted by:</h1>
+                      <img class="w-[4%] bg-zinc-100 border border-black rounded-full inline" {{#if data.postOwner}} src = "https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif" {{else}} src = "https://i.pinimg.com/originals/6f/65/78/6f65784caf4dd9f9932de464788dde43.jpg"{{/if}}>
+                      <a class="userLink text-base font-medium inline underline decoration-1 italic cursor-pointer" id = {{data.uid}}>Anon</a>
+                  </div>
+              {{/if}}
+
+              <p class="text-xs mb-2">{{data.date}}</p>
+              <p class="text-base mb-3 bg-gray-100 rounded p-1">{{data.post}}</p>
+              {{#if data.postOwner }}
+                  <button onclick="deletePost('{{data.id}}')" class="text-2xl text-red-500 float-right absolute top-1 right-2 hover:scale-125 transition">
+                      <i class="fa-solid fa-trash-can"></i>
+                  </button>
+              {{/if}}
+          </div>
+
+          {{#if (getUserState)}}
+              <label class="mt-2 block text-xs font-medium text-gray-900" for="message">Comment as {{getUsername}}</label>
+              <textarea class="mt-2 block text-xs p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 min-h-[50px] max-h-[500px] resize-y" id="replyMessage" placeholder="ex... Express your thoughts"></textarea>
+              <button class="float-left inline mt-2 py-2 px-4 text-xs text-white border rounded border-blue-500 bg-blue-500 hover:text-blue-500 hover:bg-white hover:transition-all transition ease-in-out delay-120 ml-auto" onclick="replyPost('{{data.id}}')">Comment</button>
+          {{/if}}
+
+          {{#if data.reply}}
+              <div class="relative  mt-4">
+                  {{#each data.reply}}
+                      {{#if reply}}
+                          <div class="relative p-2 text-sm mb-2 border-l border-black break-words {{#if replyOwner}} bg-blue-300 {{else}}bg-zinc-50{{/if}}">
+                              {{#if user}}
+                                  <div class = "flex flex-row items-center gap-1 items-end break-words">
+                                      <img class="w-[4%] bg-zinc-100 border border-black rounded-full inline" {{#if data.postOwner}} src = "https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif" {{else}} src = "https://i.pinimg.com/originals/6f/65/78/6f65784caf4dd9f9932de464788dde43.jpg"{{/if}}>
+                                      <a class="userLink text-sm font-medium inline underline decoration-1 text-left cursor-pointer" id = {{uid}}>{{user}}</a>
+                                      {{#if postOP}}
+                                          <p class = "font-black text-blue-900 inline">OP</p>
+                                      {{/if}}
+                                      <p class="text-xs">{{date}}</p>
+                                  </div>
+
+                              {{else}}
+                                  <img class="w-[4%] bg-zinc-100 border border-black rounded-full inline" {{#if replyOwner}} src = "https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif" {{else}} src = "https://i.pinimg.com/originals/6f/65/78/6f65784caf4dd9f9932de464788dde43.jpg"{{/if}}>
+                                  <a class="userLink text-sm font-medium inline underline decoration-1 text-left italic cursor-pointer" id = {{uid}}>Anon</a>
+                                  {{#if postOP}}
+                                      <p class = "font-black text-blue-900 inline">OP</p>
+                                  {{/if}}
+                              {{/if}}
+                              <p class="text-base mb-3">{{reply}}</p>
+                              {{#if replyOwner}}
+                                  <button onclick="deletePostReply('{{id}}')" class="text-base float-right absolute top-3 right-3 hover:text-red-600 hover:scale-105 transition">
+                                      <i class="fa-solid fa-trash-can"></i>
+                                  </button>
+                              {{/if}}
+                          </div>
+                      {{/if}}
+                  {{/each}}
+              </div>
+          {{/if}}
+      </div>
+    </script>
+
+    <script id="userProfile" type="text/x-handlebars-template">
+      <div class="w-full flex flex-row justify-center gap-2 px-10">
+        <div class="flex flex-col w-lg w-5/12 max-w-lg">
+          <div
+            class="mb-5 w-full flex flex-row gap-5 justify-around items-start transition"
+            id="userProfileActivityButtonContainer"
+          >
+            <button
+              class="text-xl font-bold border-b-4 border-blue-500"
+              id="profileOverviewButton"
+            >Overview</button>
+            <button
+              class="text-xl font-bold"
+              id="profilePostsButton"
+            >Posts</button>
+            <button
+              class="text-xl font-bold"
+              id="profileCommentsButton"
+            >Comments</button>
+            {{#if isMainUser}}
+              <button
+                class="text-xl font-bold"
+                id="profilePinsButton"
+              >Pins</button>
+            {{/if}}
+          </div>
+
+          <div
+            id="userContentContainer"
+            class="h-full overflow-x-hidden overflow-y-auto flex flex-col gap-2 posts-container"
+          ></div>
+        </div>
+
+        <div class="flex flex-col max-w-lg gap-3">
+          <div
+            class="bg-white border border-gray-200 rounded-lg shadow px-4 py-4 relative"
+          >
+            {{#if isMainUser}}
+              <img
+                class="inline-block w-1/6 bg-zinc-100 border border-black rounded-full"
+                src="https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif"
+                alt=""
+              />
+            {{else}}
+              <img
+                class="inline w-1/6 bg-zinc-100 border border-black rounded-full"
+                src="https://i.pinimg.com/originals/6f/65/78/6f65784caf4dd9f9932de464788dde43.jpg"
+                alt=""
+              />
+            {{/if}}
+            <h1 class="text-lg font-bold break-words">
+              {{#if username}}
+                {{username}}
+              {{else}}
+                <p class="italic">Anon</p>
+              {{/if}}
+            </h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              Laboriosam hic quaerat nihil porro nemo, debitis officiis quas
+              consequatur ad illum.</p>
+            <button
+              class="text-base float-right px-4 py-2 border rounded text-white bg-blue-500 hover:text-blue-500 hover:bg-white hover:border-blue-500 transition"
+            >Follow</button>
+            <svg
+              class="absolute top-3 right-4 w-5 h-5 text-gray-800"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 16 3"
+            ><path
+                d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z"
+                class="text-black"
+              /></svg>
+          </div>
+          <div
+            class="text-center bg-white border border-gray-200 rounded-lg shadow px-4 py-4 relative"
+          >
+            <q class="bg-gray-300 px-3 py-1 rounded">I am cat</q>
+          </div>
+          <div
+            class="bg-white border border-gray-200 rounded-lg shadow px-4 py-4 relative gap-2"
+          >
+            <p class="font-semibold">Trophies</p>
+            <div class="flex flex-row items-center">
+              <img
+                width="40"
+                height="40"
+                src="https://img.icons8.com/bubbles/50/verified-account.png"
+                alt="verified-account"
+              />
+              <p>Verified</p>
+            </div>
+
+            <div class="flex flex-row items-center">
+              <img
+                width="40"
+                height="40"
+                src="https://img.icons8.com/plasticine/100/grass.png"
+                alt="grass"
+              />
+              <p>Touch Grass</p>
+            </div>
+
+            <div class="flex flex-row items-center">
+              <img
+                width="40"
+                height="40"
+                src="https://img.icons8.com/glyph-neue/64/cat-lying.png"
+                alt="cat-lying"
+              />
+              <p>Cat Club</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+    <script id="userComments" type="text/x-handlebars-template">
+      <div class="relative flex flex-col">
+          {{#if data}}
+          {{#each data}}
+              <div id = "{{postParent}}" class="post-item relative p-2 text-sm border-l border-black break-words {{#if replyOwner}} bg-blue-300 {{else}}bg-zinc-50{{/if}}">
+                  {{#if user}}
+                      <div class = "flex flex-row items-center gap-1 items-end break-words">
+                          <img class="w-[4%] bg-zinc-100 border border-black rounded-full inline" {{#if data.postOwner}} src = "https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif" {{else}} src = "https://i.pinimg.com/originals/6f/65/78/6f65784caf4dd9f9932de464788dde43.jpg"{{/if}}>
+                          <a class="userLink text-sm font-medium inline underline decoration-1 text-left cursor-pointer" id = {{data.uid}}>{{user}}</a>
+                          {{#if postOP}}
+                              <p class = "font-black text-blue-900 inline">OP</p>
+                          {{/if}}
+                          <p class="text-xs">{{date}}</p>
+                      </div>
+                  {{else}}
+                      <img class="w-[4%] bg-zinc-100 border border-black rounded-full inline" {{#if replyOwner}} src = "https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif" {{else}} src = "https://i.pinimg.com/originals/6f/65/78/6f65784caf4dd9f9932de464788dde43.jpg"{{/if}}>
+                      <a class="userLink text-sm font-medium inline underline decoration-1 text-left italic cursor-pointer" id = {{data.uid}}>Anon</a>
+                      {{#if postOP}}
+                          <p class = "font-black text-blue-900 inline">OP</p>
+                      {{/if}}
+                  {{/if}}
+                  <p class="text-base mb-3">{{reply}}</p>
+                  {{#if replyOwner}}
+                      <button onclick="deletePostReply('{{id}}')" class="text-base float-right absolute top-3 right-3 hover:text-red-600 hover:scale-105 transition">
+                          <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                  {{/if}}
+              </div>
+          {{/each}}
+          {{else}}
+              <img src="https://media.tenor.com/wbMwEgXdIcsAAAAi/milk-cat.gif" class = "w-1/2 mx-auto" alt="">
+              <p class = "text-center">Wow empty...</p>
+          {{/if}}
+      </div>
+    </script>
+
+    <script id="recent-posts-template" type="text/x-handlebars-template">
+      <div class="py-3 px-4">
+        <h1 class="font-semibold text-sm">Recent Posts</h1>
+        <div id="" class="flex flex-col gap-1 p-4 posts-container">
+          {{#each data}}
+            <div
+              class="w-full max-h-12 border-b flex flex-row post-item bg-gray-100 overflow-x-hidden cursor-pointer hover:scale-105 transition-all overflow-y-hidden"
+              id={{id}}
+            >
+              <img
+                class="w-[15%]"
+                width="32"
+                height="32"
+                src="https://img.icons8.com/windows/32/multiline-text.png"
+                alt="multiline-text"
+              />
+              <div class="flex flex-col justify-between">
+                <div class="w-[100%] h-[90%] flex items-center overflow-hidden truncate text-ellipses">
+                  <p class="text-xs">{{post}}</p>
+                </div>
+                <div class="flex flex-row gap-2">
+                  {{#if user}}
+                    <h1 class="text-xs font-semibold">{{user}}</h1>
+                  {{else}}
+                    <h1 class="text-xs font-semibold italic">Anon</h1>
+                  {{/if}}
+                  <p class="text-xs"> {{replyCount}} Comments</p>
+                </div>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+        <button
+          class="text-sm font-semibold"
+          onclick="clearRecentPosts()"
+        >Clear</button>
+      </div>
+    </script>
+  </head>
+
+  <body class="bg-[#E3F2F1]">
+    <header
+      class="fixed top-0 w-full z-20 flex items-center justify-between p-4 bg-cyan-300 border-b-[#6E7291] shadow-md"
+    >
+      <div class="flex items-center">
+        <div class="flex items-end">
+          <img
+            class="w-[10%]"
+            src="https://media.tenor.com/lqtU1G4aaqIAAAAi/yom-dance.gif"
+            alt=""
+          />
+          <a class="inline cursor-pointer" id = "logo">
+            <h1 class="text-3xl font-black text-black underline">
+              CaTalk Forum
+            </h1>
+          </a>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex flex-row items-center">
+          <div class="relative">
+            <input
+              class="w-full text-black shadow appearance-none border rounded py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
+              type="text"
+              id="searchInput"
+              placeholder="Search posts"
+            />
+            <i
+              class="fa-solid fa-magnifying-glass text-blue-500 absolute top-1/2 transform -translate-y-1/2 right-4 cursor-pointer"
+            ></i>
+          </div>
+        </div>
+        <button
+          class="hidden py-2 px-4 text-white border rounded border-blue-500 bg-blue-500 hover:text-blue-500 hover:bg-white hover:transition-all transition ease-in-out delay-120 ml-auto"
+          id="createPostBtn"
+        >
+          Create Post
+        </button>
+        <button
+          class="hidden py-2 px-4 text-white border rounded border-blue-500 bg-blue-500 hover:text-blue-500 hover:bg-white hover:transition-all transition ease-in-out delay-120 ml-auto"
+          id="signOutBtn"
+        >
+          Sign Out
+        </button>
+        <button
+          class="hidden py-2 px-4 text-white border rounded border-blue-500 bg-blue-500 hover:text-blue-500 hover:bg-white hover:transition-all transition ease-in-out delay-120 gap-3"
+          id="loginBtn"
+        >
+          Login
+        </button>
+        <button
+          class="hidden py-2 px-4 text-white border rounded border-blue-500 bg-blue-500 hover:text-blue-500 hover:bg-white hover:transition-all transition ease-in-out delay-120 gap-3"
+          id="registerBtn"
+        >
+          Register
+        </button>
+
+        <button class="text-4xl" id="sidebar-button">
+          <i
+            class="fa-solid fa-user text-blue-500 border-white hover:text-white hover:border-blue-500 hover:transition-all transition ease-in-out delay-120 ml-auto"
+          ></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="flex hidden flex-row w-full gap-3 mt-28 justify-center">
+      <div
+        id="posts-container"
+        class="posts-container max-w-lg overflow-x-hidden h-full max-h-max"
+      ></div>
+
+      <div class="w-[20%] flex flex-col gap-2">
+        <div id="recent-posts-container" class="w-full bg-white"></div>
+
+        <div
+          class="sticky top-20 w-full bg-white p-3 rounded text-base justify-around grid grid-cols-1 gap-4"
+        >
+          <div
+            class="flex flex-row justify-between p-4 bg-white border-b-[1px]"
+          >
+            <h1 class="text-sm font-semibold">User Agreement</h1>
+            <a class="text-sm font-semibold cursor-pointer">Content Policy</a>
+          </div>
+
+          <div
+            class="flex flex-row justify-between items-around py-2 px-4 border-b-[1px]"
+          >
+            <div class="flex flex-col text-sm">
+              <a class="cursor-pointer">English</a>
+              <a class="cursor-pointer">Filipino</a>
+              <a class="cursor-pointer">Cebuano</a>
+            </div>
+            <div class="flex flex-col text-sm">
+              <a class="cursor-pointer">Japanese</a>
+              <a class="cursor-pointer">Français</a>
+            </div>
+          </div>
+
+          <div class="flex flex-row items-center justify-around gap-2 mx-20">
+            <a
+              class="hover:scale-105 transition"
+              href="https://icons8.com"
+              target="_blank"
+            >
+              <img
+                width="30"
+                height="30"
+                src="https://img.icons8.com/color/48/icons8-new-logo.png"
+                alt="icons8-new-logo"
+              />
+            </a>
+            <a
+              class="hover:scale-105 transition"
+              href="https://fontawesome.com/"
+              target="_blank"
+            >
+              <img
+                width="32"
+                height="32"
+                src="https://img.icons8.com/windows/32/font-awesome.png"
+                alt="font-awesome"
+              />
+            </a>
+            <a
+              class="hover:scale-105 transition"
+              href="https://github.com/Kuugang/catalk"
+              target="_blank"
+            >
+              <img
+                width="28"
+                height="28"
+                src="https://img.icons8.com/glyph-neue/64/github.png"
+                alt="github"
+              />
+            </a>
+          </div>
+
+          <div
+            class="max-w-[280px] flex flex-row items-end justify-center bottom-5 left-3"
+          >
+            <p class="text-sm font-semibold">Kuugang</p>
+            <img
+              class="w-[12%]"
+              src="https://media.tenor.com/j_XffFNH-8gAAAAi/phone.gif"
+              alt=""
+            />
+            <p class="text-sm font-semibold ml-1">| All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div
+      id="mainPostFocusContainer"
+      class="hidden postFocusContainer fixed left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 w-[60%] flex items-center max-h-[3/4] z-50"
+    ></div>
+
+    <button
+      id="backToTop"
+      onclick="backToTop()"
+      class="fixed hidden bottom-5 right-5 rounded-full bg-black text-white p-4 cursor-pointer z-10 transition-all"
+    >
+      <i class="fa-solid fa-arrow-up" style="animation: up 1.5s infinite"></i>
+      Back to top
+    </button>
+
+    <div
+      id="drawer"
+      class="fixed top-0 right-0 transform translate-x-full z-40 w-1/3 h-full transition-all duration-300 transform bg-white shadow-lg pl-4 pt-6 pb-1"
+    >
+      <div class="h-full">
+        <div class="flex items-center justify-between pr-5">
+          <h2 class="text-lg font-bold">Profile</h2>
+          <button class="text-sm" onclick="viewProfile()">
+            Profile <i class="fa-solid fa-pencil"></i>
+          </button>
+        </div>
+        <div class="flex flex-col justify-center items-center gap-1">
+          <img
+            class="w-3/12 bg-zinc-100 border border-black rounded-full"
+            src="https://media.tenor.com/BEBopBnhjVEAAAAi/peach-and-goma-peach-goma.gif"
+            alt=""
+          />
+          <a
+            class="userLink block text-lg font-semibold cursor-pointer"
+            id="currentUser"
+          ></a>
+          <p class="text-gray-500">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quia
+            assumenda consequuntur excepturi, corporis optio numquam ipsum aut?
+            Vel, dolore natus!
+          </p>
+        </div>
+        <h2 class="text-lg font-bold mt-6">My activities</h2>
+        <div
+          id="activity"
+          class="overflow-x-hidden overflow-y-auto max-h-96"
+        ></div>
+      </div>
+    </div>
+
+    <div
+      id="signOutConfirm"
+      class="hidden z-30 fixed bg-white px-8 py-6 border rounded shadow-md top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+    >
+      <div class="flex flex-col items-center">
+        <h1 class="text-center text-4xl font-black">Sign out</h1>
+        <img
+          class="w-1/3"
+          src="https://media.tenor.com/t7yxNky6vVoAAAAi/sebusun-mocha.gif"
+          alt=""
+        />
+        <p class="font-medium">
+          Are you sure you would like to sign out of your account?
+        </p>
+        <div class="flex flex-row justify-center gap-3 mt-4">
+          <button
+            id="signoutConfirmButton"
+            class="py-2 px-4 text-black border rounded border-blue-500 hover:text-white hover:bg-blue-500 hover:transition-all transition ease-in-out delay-120"
+          >
+            Sign out
+          </button>
+          <button
+            id="signoutCancelButton"
+            class="py-2 px-4 text-white border rounded border-blue-500 bg-blue-500 hover:text-blue-500 hover:bg-white hover:transition-all transition ease-in-out delay-120"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <form
+      class="createPostContainer hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 z-30 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-1/2"
+      action=""
+      id="newPost"
+    >
+      <div class="flex items-end">
+        <label class="mt-5 text-3xl font-medium text-gray-900" for="message"
+          >Got something to share?
+        </label>
+        <img
+          class="w-1/12"
+          src="https://media.tenor.com/be0JrmqzM5oAAAAi/mochi-peach.gif"
+          alt=""
+        />
+      </div>
+      <textarea
+        class="mt-5 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 mb-6 min-h-[100px] max-h-[200px] resize-y"
+        id="message"
+        placeholder="ex...Lately, I've been, I've been losing sleep Dreaming about the things that we could be But baby, I've been, I've been praying hard"
+      ></textarea>
+      <button
+        class="py-2 px-4 text-white border rounded border-blue-500 bg-blue-500 hover:text-blue-500 hover:bg-white hover:transition-all transition ease-in-out delay-120 float-right"
+        onclick="createNewPost(event)"
+      >
+        Post
+      </button>
+    </form>
+
+    <form
+      class="registerContainer hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 z-30 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+      id="register"
+    >
+      <label class="block text-black text-4xl font-bold mb-2" for="firstName"
+        >Register</label
+      >
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="firstName"
+        >Enter fist name:
+      </label>
+      <input
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        type="text"
+        id="registerFirstName"
+      />
+
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="lastName"
+        >Enter last name:
+      </label>
+      <input
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        type="text"
+        id="registerLastName"
+      />
+
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="username"
+        >Enter username:
+      </label>
+      <input
+        class="mb-4 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        type="text"
+        id="registerUserName"
+      />
+
+      <button
+        class="py-2 px-4 text-white border rounded border-blue-500 bg-blue-500 hover:text-blue-500 hover:bg-white hover:transition-all transition ease-in-out delay-120 float-right"
+      >
+        Register
+      </button>
+    </form>
+
+    <form
+      action=""
+      class="loginContainer hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 z-30 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+      id="login"
+    >
+      <label class="block text-black text-4xl font-bold mb-2" for="firstName"
+        >Login</label
+      >
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="username"
+        >Enter username:
+      </label>
+      <input
+        class="mb-4 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        type="text"
+        id="loginUserName"
+        val=""
+      />
+      <button
+        class="py-2 px-4 text-white border rounded border-blue-500 bg-blue-500 hover:text-blue-500 hover:bg-white hover:transition-all transition ease-in-out delay-120 float-right"
+      >
+        Login
+      </button>
+    </form>
+
+    <div
+      class="hidden spinner fixed z-50 top-0 left-0 w-full h-full flex justify-center items-center bg-opacity-50 bg-gray-200"
+    >
+      <div
+        class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+        role="status"
+      >
+        <span
+          class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
+          >Loading...</span
+        >
+      </div>
+    </div>
+
+    <div
+      class="posts-loader absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+    >
+      <img
+        class=""
+        src="https://media.tenor.com/EWB9EfXiwuEAAAAi/chill-cute.gif"
+        alt=""
+      />
+      <h1 class="text-center text-4xl font-bold mt-4">Getting posts...</h1>
+    </div>
+
+    <div
+      id="toast-container"
+      class="fixed flex flex-col gap-4 top-24 right-5"
+    ></div>
+    <div class="overlay backdrop-blur-sm hidden"></div>
+    <script src="index.js" defer></script>
+  </body>
+</html>
